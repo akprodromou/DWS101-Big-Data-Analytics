@@ -1,0 +1,14 @@
+---
+title: "Quarto Basics"
+format: html
+
+---
+
+## Test
+
+hello
+
+```{python}
+print("Hello")
+
+```
