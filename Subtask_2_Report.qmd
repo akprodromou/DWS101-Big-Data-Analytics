@@ -1,14 +1,158 @@
 ---
-title: "Quarto Basics"
-format: html
+title: "Technologies for Big Data Analytics"
+format:
+  html:
+    code-fold: true
+author-title: "Antonis Prodromou"
+---
+
+# Εργασία 1 - Threads and Processes
+
+**Όνομα:** Αντώνης Προδρόμου
+
+**Ημερομηνία:** 23 Νοεμβρίου 2025
 
 ---
 
-## Test
+## Περιγραφή Λύσης
 
-hello
+Για την επίλυση του προβλήματος, ακολουθούμε την αρχή της Μοναδικής Αρμοδιότητας, δηλαδή όλες οι κλάσεις και οι λογισμικές μονάδες (modules) να έχουν μόνο μια, ξεκάθαρα ορισμένη αρομοδιότητα. Επομένως δημιουργούμε τις παρακάτω 6 κλάσεις, σε δύο επίπεδα (ανώτερου επιπέδου και ένθετες):
+
+## Κλάση Ανώτερου Επιπέδου
+
+**ProducerConsumerMain**
+
+Αυτή είναι η κύρια δημόσια κλάση από την οποία παίρνει το όνομά του το αρχείο (ProducerConsumerMain.java).
+Περιέχει τη μέθοδο `main()` - το σημείο εισόδου του προγράμματός σας.
+
+## Εσωτερικές Κλάσεις
+* **Disease** - τοπική εσωτερική κλάση (ορίζεται εντός της μεθόδου `main()`).
+    Υλοποιεί το `Runnable`, αναπαριστώντας το νήμα **παραγωγού** (*producer*).
+* **Hospital** - τοπική εσωτερική κλάση (επίσης εντός της `main()`).
+    Υλοποιεί το `Runnable`, αναπαριστώντας το νήμα **καταναλωτή** (*consumer*).
+* **Registry** - στατική ένθετη κλάση (ορίζεται σε επίπεδο κλάσης).
+    Διατηρεί αρχείο καταγραφής των δεδομένων του νοσοκομείου και της κοινόχρηστης κατάστασης (*shared state*).
+* **DiseaseGeneration** - στατική ένθετη κλάση.
+    Διαχειρίζεται τη λογική παραγωγής (δημιουργία νέων κρουσμάτων).
+* **DiseaseHealing** - στατική ένθετη κλάση.
+    Διαχειρίζεται τη λογική κατανάλωσης (θεραπεία και εξιτήρια κρουσμάτων).
+
+Υπάρχει επίσης μια εξωτερική εξάρτηση (dependency) με όνομα `IterationLog`, ορισμένη σε ξεχωριστό αρχείο.
+
+---
+
+## Ενότητες (Modules)
+
+Οι λογισμικές μονάδες διακρίνονται στις εξής:
+
+| Ενότητα | Σκοπός |
+| :--- | :--- |
+| **DiseaseGeneration** | Ενσωματώνει όλη τη λογική παραγωγής (δημιουργία νέων κρουσμάτων). |
+| **DiseaseHealing** | Ενσωματώνει όλη τη λογική θεραπείας (εξιτήρια ασθενών). |
+| **Registry** | Κεντρική ενότητα διαχείρισης κατάστασης. Κοινή μεταξύ των νημάτων. |
+| **IterationLog (εξωτερική)** | Ενότητα καταγραφής δεδομένων / *logging*. |
+
+Αυτές είναι επαναχρησιμοποιήσιμες, λογικά απομονωμένες και θα μπορούσαν να τοποθετηθούν σε δικά τους αρχεία χωρίς να χαθεί η λειτουργικότητα.
 
 ```{python}
-print("Hello")
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set style for better-looking plots
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (14, 10)
+
+# Load the data
+df = pd.read_csv('hospital_data.csv')
+
+# Create a figure with multiple subplots
+fig, axes = plt.subplots(3, 2, figsize=(16, 14))
+fig.suptitle('Hospital Patient Management Analysis', fontsize=16, fontweight='bold')
+
+# 1. Patients Over Time
+ax1 = axes[0, 0]
+ax1.plot(df['GenerationIter'], df['PatientsBeingTreated'], 
+         marker='o', label='Patients Being Treated', linewidth=2)
+ax1.plot(df['GenerationIter'], df['TotalSickPatients'], 
+         marker='s', label='Total Sick Patients', linewidth=2, alpha=0.7)
+ax1.set_xlabel('Generation Iteration')
+ax1.set_ylabel('Number of Patients')
+ax1.set_title('Patient Load Over Time')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+
+# 2. Admissions vs Rejections
+ax2 = axes[0, 1]
+admitted = df.groupby('GenerationIter')['PatientsAdmitted'].sum()
+rejected = df.groupby('GenerationIter')['PatientsRejected'].max()
+x = range(len(admitted))
+width = 0.35
+ax2.bar([i - width/2 for i in x], admitted.values, width, 
+        label='Admitted', color='green', alpha=0.7)
+ax2.bar([i + width/2 for i in x], rejected.values, width, 
+        label='Rejected', color='red', alpha=0.7)
+ax2.set_xlabel('Generation Iteration')
+ax2.set_ylabel('Number of Patients')
+ax2.set_title('Patients Admitted vs Rejected per Generation')
+ax2.set_xticks(x)
+ax2.set_xticklabels(admitted.index)
+ax2.legend()
+ax2.grid(True, alpha=0.3, axis='y')
+
+# 3. Cumulative Healing Progress
+ax3 = axes[1, 0]
+ax3.plot(df['GenerationIter'], df['TotalPatientsHealed'], 
+         marker='o', color='green', linewidth=2, label='Total Healed')
+ax3.plot(df['GenerationIter'], df['TotalPatientsRejected'], 
+         marker='x', color='red', linewidth=2, label='Total Rejected')
+ax3.fill_between(df['GenerationIter'], df['TotalPatientsHealed'], 
+                 alpha=0.3, color='green')
+ax3.fill_between(df['GenerationIter'], df['TotalPatientsRejected'], 
+                 alpha=0.3, color='red')
+ax3.set_xlabel('Generation Iteration')
+ax3.set_ylabel('Cumulative Count')
+ax3.set_title('Cumulative Patients Healed vs Rejected')
+ax3.legend()
+ax3.grid(True, alpha=0.3)
+
+# 4. Event Type Distribution
+ax4 = axes[1, 1]
+event_counts = df['EventType'].value_counts()
+colors = ['#2ecc71', '#3498db']
+ax4.pie(event_counts.values, labels=event_counts.index, autopct='%1.1f%%',
+        colors=colors, startangle=90)
+ax4.set_title('Distribution of Event Types (PRODUCE vs HEAL)')
+
+# 5. Healing Efficiency Over Time
+ax5 = axes[2, 0]
+heal_events = df[df['EventType'] == 'HEAL'].copy()
+if not heal_events.empty:
+    ax5.scatter(heal_events['GenerationIter'], heal_events['HealedPatients'],
+               s=100, alpha=0.6, c=heal_events['HealedPatients'], 
+               cmap='YlGn', edgecolors='black')
+    ax5.set_xlabel('Generation Iteration')
+    ax5.set_ylabel('Patients Healed per Event')
+    ax5.set_title('Healing Events: Patients Healed per Iteration')
+    ax5.grid(True, alpha=0.3)
+    cbar = plt.colorbar(ax5.collections[0], ax=ax5)
+    cbar.set_label('Patients Healed')
+
+# 6. Hospital Capacity Utilization
+ax6 = axes[2, 1]
+ax6.plot(df['GenerationIter'], df['PatientsBeingTreated'], 
+         marker='o', linewidth=2, color='purple')
+ax6.axhline(y=20, color='red', linestyle='--', linewidth=2, 
+           label='Capacity Limit (20)', alpha=0.7)
+ax6.fill_between(df['GenerationIter'], 0, df['PatientsBeingTreated'], 
+                 alpha=0.3, color='purple')
+ax6.set_xlabel('Generation Iteration')
+ax6.set_ylabel('Patients Being Treated')
+ax6.set_title('Hospital Capacity Utilization')
+ax6.legend()
+ax6.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
 
 ```
