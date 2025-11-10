@@ -18,18 +18,18 @@ import java.util.List;
 public class ProducerConsumerMain {
     // Ορισμός παραμέτρων με static final, γιατί είναι παράμετροι του μοντέλου και όχι καταγραφής
     // Οι constants στη Java ορίζονται με κεφαλαία
-    // Αριθμός επαναλήψεων για την ολοκλήρωση του προγράμματος
     // static: there is only one copy shared by all instances
     // final: the variable's value can't change after it's been assigned - it becomes a constant
-    static final int ITERATIONS = 20;
-    // Περίοδος δημιουργίας κρουσμάτων
-    static final int CASE_CREATION_TIME = 500;
+    // Αριθμός επαναλήψεων για την ολοκλήρωση του προγράμματος
+    static final int ITERATIONS = 30;
+    // Περίοδος δημιουργίας κρουσμάτων (σε ms)
+    static final int CASE_CREATION_TIME = 1000;
     // Μέγιστος αριθμός εμφάνισης νέων κρουσμάτων k
     static final int CASES_CREATION_RATE = 10;
     // Χωρητικότητα συστήματος υγείας σε κλίνες Μ.Ε.Θ.
     static final int SYSTEM_CAPACITY = 20;
     // Περίοδος θεραπείας κρούσματος
-    static final int CASE_HEAL_TIME = 2000;
+    static final int CASE_HEAL_TIME = 5000;
     // Μέγιστος αριθμός θεραπείας κρουσμάτων h, με h < k
     static final int CASE_HEAL_RATE = 8;
 
@@ -95,7 +95,7 @@ public class ProducerConsumerMain {
         }
         // The AtomicBoolean class provides atomic access to a boolean variable.
         // Unlike a regular boolean variable, which can be accessed and modified by
-        // multiple threads in an unsafe manner, AtomicBoolean ensures that the updates are atomic and thread-safe
+        // multiple threads in an unsafe manner, AtomicBoolean ensures that the updates are atomic
         AtomicBoolean raceFinished = new AtomicBoolean(false);
 
         // πέρνα το raceFinished στους constructors
@@ -108,8 +108,9 @@ public class ProducerConsumerMain {
         disease.join();
         hospital.join();
 
-        // Export to CSV
-        try (FileWriter writer = new FileWriter("hospital_data.csv")) {
+        // Για να κάνω export σε CSV
+        try (FileWriter writer = new FileWriter("producer_consumer_results_" + ITERATIONS
+                + "_" + CASE_CREATION_TIME + ".csv")) {
             // Write header
             writer.append("GenerationIter,HealingIter,IncomingPatients,PatientsBeingTreated,PatientsRejected,PatientsAdmitted,TotalSickPatients,HealedPatients,TotalPatientsHealed,TotalPatientsRejected,EventType\n");
 
