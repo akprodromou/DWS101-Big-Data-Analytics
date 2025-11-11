@@ -5,130 +5,126 @@ package Subtask_1_Matrices;
 // Για να δημιουργήσω τους τυχαίους αριθμούς
 import java.util.Random;
 // Για πράξεις μεταξύ πινάκων
-import java.util.Arrays;
 
-// runnable: αυτή η κλάση μπορεί να τρέξει από ένα thread
-public class MatrixMultiplication implements Runnable {
-    // Μεταβλητές που ορίζουν τον πίνακα
-    // το n (αριθμός γραμμών) πρέπει να είναι δύναμη του 2
-    int n = 16;
-    // για το m (αριθμός στηλών του πίνακα και αριθμός γραμμών του διανύσματος) δεν υπάρχει περιορισμός
-    int m = 10;
-    // ο αριθμός των νημάτων πρέπει επίσης να είναι δύναμη του 2 και n > k
-    int k = 2;
 
-    // Κάνω initialize τα object fields
-    // Ορίζω τον πίνακά μου n x m
-    int[][] array = new int[n][m];
+public class MatrixMultiplication {
+    // Τα κοινά δεδομένα για όλα τα threads
+    // Ορίζω τις μεταβλητές μου ως private, γιατί δεν χρειάζονται κάπου αλλού
+    private int[][] array;
     // Και το διάνυσμα m x 1
-    int[] vector = new int[m];
+    private int[] vector;
     // Τα οποία θα δημιουργήσουν ένα διάνυσμα n x 1
-    int[] result = new int[n];
-    // το γινόμενο της σειράς που θα υπολογίζει κάθε thread
-    int row;
+    private int[] result;
+    private int m;
+    private int n;
 
-    // Ας δημιουργήσω ένα instance του Random για τους τυχαίους αριθμούς
-    Random rand = new Random();
+    // our constructor
+    public MatrixMultiplication(int m, int n) {
+        // Κάνε initialize βάση των m και n που περνάω ως arguments
+        this.m = m;
+        this.n = n;
+        // array allocation
+        this.array = new int[n][m];
+        this.vector = new int[m];
+        this.result = new int[n];
+        // Χρησιμοποιώ την κλάση Random() για να δημιουργήσω τους τυχαίους ακέραιους με το nextInt()
+        Random random = new Random();
 
-    // για να αποθηκεύσω χρόνο για κάθε thread
-    long[] threadTimes;
-
-    // Για να ξέρω πού βρίσκομαι με κάθε thread
-    int startRow;
-    int endRow;
-
-    // Ο constructor της κλάσης για τα threads
-    public MatrixMultiplication(int[][] array, int[] vector, int[] result, int startRow, int endRow, long[] threadTimes, int threadId) {
-        // initialize the fields of the object using the parameters we pass on
-        this.array = array;
-        this.vector = vector;
-        this.result = result;
-        this.startRow = startRow;
-        this.endRow = endRow;
-        this.threadTimes = threadTimes;
-        this.row = threadId;
-    }
-
-    // Δημιούργησε έναν empty constructor στο main() για να κάνω initialize τις μεταβλητές μου
-    public MatrixMultiplication() {}
-
-    // κάθε thread θα τρέχει τον πολλαπλασιασμό μιας σειράς με το διάνυσμα
-    // Χρησιμοποιώ override γιατί ανατρέπω μια μέθοδο (την run()) της Runnable() superclass
-    @Override
-    public void run() {
-        // nanoTime() for measuring elapsed time
-        long startTime = System.nanoTime();
-        // Κάθε thread υπολογίζει πολλές γραμμές
-        for (int i = startRow; i < endRow; i++) {
-            for (int j = 0; j < vector.length; j++) {
-                result[i] += array[i][j] * vector[j];
+        // «γεμίζω» τον πίνακα array με τυχαίους αριθμούς μεταξύ 0 και 10
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < m; j++){
+                array[i][j] = random.nextInt(10);
             }
         }
-        long endTime = System.nanoTime();
-        // αποθήκευσε τον χρόνο σε microseconds
-        threadTimes[row] = (endTime - startTime) / 1000;
+        // «γεμίζω» το διάνυσμα vector με τυχαίους αριθμούς μεταξύ 0 και 10
+        for (int j = 0; j < m; j++){
+            vector[j] = random.nextInt(10);
+        }
     }
 
-    // Δημιουργώ έναν constructor για το initialization logic
-    // void: no return argument
+    // runnable: αυτή η κλάση μπορεί να τρέξει από ένα thread (the worker)
+    private static class Worker implements Runnable {
+        // τις δηλώνω ως final για να αποφύγω τυχόν τροποποίηση από λάθος
+        private final int[][] array;
+        private final int[] vector;
+        private final int[] result;
+        // Για να ξέρω πού βρίσκομαι με κάθε thread
+        private final int startRow;
+        private final int endRow;
+        // για να αποθηκεύσω χρόνο για κάθε thread χρησιμοποιώ μεταβλητή τύπου long
+        private final long threadTimes [];
+        private final int row;
+
+        // Ο constructor για τα threads
+        public Worker(int[][] array, int[] vector, int[] result, int startRow, int endRow, long[] threadTimes, int row){
+            this.array = array;
+            this.vector = vector;
+            this.result = result;
+            this.startRow = startRow;
+            this.endRow = endRow;
+            this.threadTimes = threadTimes;
+            this.row = row;
+        }
+
+        // στο run() θα τρέξουν οι πολλαπλασιασμοί για κάθε thread
+        // κάθε thread θα τρέχει τον πολλαπλασιασμό μιας σειράς με το διάνυσμα
+        // Χρησιμοποιώ override γιατί ανατρέπω μια μέθοδο (την run()) της Runnable() superclass
+        @Override
+        public void run() {
+            // nanoTime() for measuring elapsed time
+            long startTime = System.nanoTime();
+            // Κάθε thread υπολογίζει πολλές γραμμές
+            for (int i = startRow; i < endRow; i++) {
+                // j: ο αριθμός στηλών
+                for (int j = 0; j < vector.length; j++) {
+                    result[i] += array[i][j] * vector[j];
+                }
+            }
+            long endTime = System.nanoTime();
+            // αποθήκευσε τον χρόνο σε microseconds
+            threadTimes[row] = (endTime - startTime) / 1000;
+        }
+    }
+
     // main: από εδώ θα ξεκινήσει την εκτέλεση του προγράμματος η JVM
+    // controls the overall flow of the program, i.e. it's the orchestrator
     // String[] args: receive command-line arguments
     public static void main(String[] args) {
-        // Δημιουργώ ένα object instance της κλάσης MatrixMultiplication
-        MatrixMultiplication mm = new MatrixMultiplication();
-        // «γεμίζω» τον πίνακα Α με τυχαίους αριθμούς μεταξύ 0 και 10
-        for (int i = 0; i < mm.n; i++) {
-            for (int j = 0; j < mm.m; j++) {
-                mm.array[i][j] = mm.rand.nextInt(0, 11);
-            }
-        }
-        // «γεμίζω» το διάνυσμα v με τυχαίους αριθμούς μεταξύ 0 και 10
-        for (int i = 0; i < mm.m; i++) {
-            mm.vector[i] = mm.rand.nextInt(0, 11);
-        }
+        // Μεταβλητές που ορίζουν τον πίνακα
+        // το n (αριθμός γραμμών) πρέπει να είναι δύναμη του 2
+        int n = 4096;
+        // για το m (αριθμός στηλών του πίνακα και αριθμός γραμμών του διανύσματος) δεν υπάρχει περιορισμός
+        int m = 1000;
+        // get the matrix and vector
+        MatrixMultiplication mm = new MatrixMultiplication(m, n);
 
-        // τύπωσε τον πίνακα
-        System.out.println("Matrix A:");
-        for (int i = 0; i < mm.n; i++) {
-            System.out.println(Arrays.toString(mm.array[i]));
-        }
-        // τύπωσε το διάνυσμα
-        System.out.println("Vector v:");
-        System.out.println(Arrays.toString(mm.vector));
-        // Τρέξε το πείραμα για 1, 2, 4, 8 threads
+        // Τρέξε το πείραμα για 1, 2, 4, 8 threads (array of integers)
+        // ο αριθμός των νημάτων πρέπει επίσης να είναι δύναμη του 2 και n > k
         int[] threadCounts = {1, 2, 4, 8};
         // δημιουργώ ένα array για αποθήκευση των χρόνων
         long[] totalTimes = new long[threadCounts.length];
 
-        for (int idx = 0; idx < threadCounts.length; idx++) {
-            int k = threadCounts[idx];
-            System.out.println("\n");
-            System.out.println("Εκτέλεση με " + k + " threads:\n");
-
+        for (int i = 0; i < threadCounts.length; i++) {
+            int k = threadCounts[i];
             // Reset το result vector για κάθε πείραμα
-            int[] result = new int[mm.n];
-
+            int[] result = new int[n];
             // αποθήκευσε τον χρόνο για κάθε run
-            totalTimes[idx] = runExperiment(mm.array, mm.vector, result, mm.n, k);
-
-            // Τύπωσε το αποτέλεσμα (μόνο την πρώτη φορά για έλεγχο)
-            if (idx == 0) {
-                System.out.println("Result vector:");
-                System.out.println(Arrays.toString(result));
-            }
+            // calls multiplier to get the actual work done
+            totalTimes[i] = multiplier(mm.array, mm.vector, result, n, k);
         }
 
         // Τύπωσε σύνοψη όλων των αποτελεσμάτων
         System.out.println("\n");
         System.out.println("Αποτελέσματα:\n");
+        System.out.println("For a (" + n + " x " + m + ") matrix:\n");
         for (int i = 0; i < threadCounts.length; i++) {
             System.out.println(threadCounts[i] + " threads: " + totalTimes[i] + " microseconds");
         }
     }
 
-    // Μέθοδος που τρέχει το πείραμα
+    // Μέθοδος που τρέχει το πείραμα (ο manager)
     // static: it belongs to the class rather than an instance of the class
-    public static long runExperiment(int[][] array, int[] vector, int[] result, int n, int k) {
+    private static long multiplier(int[][] array, int[] vector, int[] result, int n, int k) {
         // Δημιούργησε ένα array object «threads» με k threads
         Thread[] threads = new Thread[k];
         // Δημιούργησε array για χρόνους
@@ -136,13 +132,17 @@ public class MatrixMultiplication implements Runnable {
         // Υπολόγισε πόσες γραμμές θα επεξεργάζεται κάθε thread
         int rowsPerThread = n / k;
 
-        // Κάθε thread θα υπολογίζει το γινόμενο μιας σειράς, ώστε να αποφύγουμε race conditions
+        // Δημιουργία threads
+        // Κάθε thread θα υπολογίζει το γινόμενο ενός τμήματος του μητρώου, ώστε να αποφύγουμε race conditions
         // για κάθε γραμμή του πίνακα, δημιούργησε ένα thread χρησιμοποιώντας τον constructor
-        for (int i = 0; i < k; i++) {
-            int startRow = i * rowsPerThread;
-            int endRow = (i + 1) * rowsPerThread;
-            // As soon as we create a new thread, it’s in the NEW state
-            threads[i] = new Thread(new MatrixMultiplication(array, vector, result, startRow, endRow, threadTimes, i));
+        for (int row = 0; row < k; row++) {
+            // αρχή του block
+            int startRow = row * rowsPerThread;
+            // τέλος του block
+            int endRow = (row + 1) * rowsPerThread;
+            // As soon as we create a new thread, it’s in the new state
+            // Δημιουργεί νήμα "Thread-#" για το αντικείμενο
+            threads[row] = new Thread(new Worker(array, vector, result, startRow, endRow, threadTimes, row));
         }
 
         // Ξεκίνα τη μέτρηση
@@ -154,7 +154,6 @@ public class MatrixMultiplication implements Runnable {
             // The thread remains in the NEW state until the program starts the thread using the start() method.
             threads[i].start();
         }
-
         // Περίμενε threads
         // Βεβαιώσου πως τα threads έχουν τελειώσει με το join()
         for (int i = 0; i < k; i++) {
@@ -171,14 +170,6 @@ public class MatrixMultiplication implements Runnable {
 
         long endTime = System.nanoTime();
         long executionTime = (endTime - startTime) / 1000;
-
-        System.out.println("Συνολικός χρόνος: " + executionTime + " microseconds");
-
-        System.out.println("Χρόνοι ανά thread:");
-        for (int i = 0; i < k; i++) {
-            System.out.println("  Thread " + i + " took " + threadTimes[i] + " microseconds");
-        }
-
         return executionTime;
     }
 }
