@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Technologies for Big Data Analytics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Subtask_4_Report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/popper.min.js"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Subtask_4_Report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Subtask_4_Report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Subtask_4_Report_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Subtask_4_Report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Subtask_4_Report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Subtask_4_Report_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Technologies for Big Data Analytics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="εργασία-1---threads-and-processes" class="level1">
+<h1>Εργασία 1 - Threads and Processes</h1>
+<section id="υποερώτημα-4---interprocess-communication" class="level2">
+<h2 class="anchored" data-anchor-id="υποερώτημα-4---interprocess-communication">Υποερώτημα 4 - Interprocess Communication</h2>
+<p><strong>Όνομα:</strong> Αντώνης Προδρόμου</p>
+<p><strong>Ημερομηνία:</strong> 23 Νοεμβρίου 2025</p>
+<hr>
+<section id="σκοπός" class="level3">
+<h3 class="anchored" data-anchor-id="σκοπός">Σκοπός</h3>
+<p>Ο σκοπός αυτής της εργασίας είναι η δημιουργία ενός συστήματος διεργασιών που αποτελείται από διεργασίες τύπου consumer, producer και server οι οποίες:</p>
+<ul>
+<li><p>Επικοινωνούν με TCP sockets.</p></li>
+<li><p>Οι server (πάνω από ένας) μπορούν να αποθηκεύσουν προϊόντα που κυμαίνονται μεταξύ 1 και 1000 σε αριθμό.</p></li>
+<li><p>Ο κάθε παραγωγός (πάνω από ένας) μπορεί να προσθέσει μεταξύ 10 και 100 μονάδων στην αποθήκευση στο server.</p></li>
+<li><p>Ο κάθε consumer (πάνω από ένας) συνδέεται τυχαία σε έναν από τους servers και αφαιρεί μεταξύ 10 και 100 μονάδων από την αποθήκευση.</p></li>
+<li><p>Κάθε server μπορεί να υποστηρίζει ταυτόχρονα πολλούς consumers και πολλούς producers, άρα θα πρέπει να υποστηρίζει multi-threading. Αυτό στην πράξη σημαίνει πως όποτε ένας client προσπαθεί να συνδεθεί, ένα διαφορετικό νήμα αναλαμβάνει να χειριστεί το αίτημά του.</p></li>
+</ul>
+<hr>
+</section>
+<section id="κλάσεις" class="level3">
+<h3 class="anchored" data-anchor-id="κλάσεις">Κλάσεις</h3>
+<p>Δημιουργούμε τις κλάσεις <code>Server</code>, <code>Producer</code> και <code>Consumer</code>, με επιπρόσθετη την κλάση <code>ClientHandler</code>, για να χειρίζεται τα αιτήματα των πελατών.</p>
+<hr>
+<section id="server" class="level4">
+<h4 class="anchored" data-anchor-id="server">Server</h4>
+<p>Ο Server δέχεται ως παράμετρο μια θύρα, εν προκειμένω τις 8881, 8882, 8883.</p>
+<p>Η μέθοδος main() του server αναλαμβάνει αφενός να δημιουργήσει ένα στιγμιότυπο Server και έπειτα να καλέσει επ’ αυτού τη μέθοδο <code>start()</code>. Η <code>start()</code> ανοίγει ένα server socket, το οποίο δέχεται τα αιτήματα σύνδεσης των client (<code>.accept()</code>) για όσο ο διακόπτης λειτουργίας running είναι <code>True</code> (ο διακόπτης επεξηγείται λεπτομερώς παρακάτω).</p>
+<p>Επιπλέον, δημιουργεί ένα νέο νήμα πάνω στο οποίο τρέχει η εφαρμογή ClientHandler. Το νήμα χρειάζεται προκειμένου ο server να είναι multi-threaded και να μπορεί να χειρίζεται αιτήματα από διαφορετικούς clients:</p>
+<p><code>new Thread(new ClientHandler(clientSocket, this, MAX_STORAGE)).start();</code></p>
+<p>Το <code>this</code> αναφέρεται στο στιγμιότυπο του Server, καθώς επί αυτού εφαρμόζεται η <code>start()</code>, που με τη σειρά της δημιουργεί έναν νέο <code>ClientHandler</code>.</p>
+<hr>
+</section>
+<section id="clienthandler" class="level4">
+<h4 class="anchored" data-anchor-id="clienthandler">ClientHandler</h4>
+<p>Η <code>ClientHandler</code> τρέχει σε ένα νήμα, και λειτουργεί ως σύνδεσμος επικοινωνίας μεταξύ client και server, τροποποιώντας την αποθήκη του server, βάση των εντολών που δέχεται από τον client. Παίρνει τρεις παραμέτρους: τα socket του server και του πελάτη, καθώς και τη μέγιστη επιτρεπόμενη χωρητικότητα του server. Ως κλάση, υλοποιεί την διεπαφή Runnable, που σημαίνει πως μπορούν να την χρησιμοποιήσουν πολλά νήματα. Όταν τρέχει, δημιουργεί:</p>
+<ul>
+<li>Ένα κανάλι εισερχομένων <code>InputStreamReader</code> που εσωκλείεται σε ένα <code>BufferReader</code> για να διαβάζει τις εντολές client και consumer ανά μπλοκ και όχι χαρακτήρα-χαρακτήρα.</li>
+<li>Ένα κανάλι εξερχομένων μέσω του <code>getOutputStream</code>, που εσωκλείεται σε <code>PrintWriter</code> για να απαντάει στον πελάτη.</li>
+</ul>
+<p>Ακολούθως οι εντολές από producer και consumer διαβάζονται γραμμή γραμμή (<code>in.readLine()</code>) και καλείται η <code>handleCommand</code>. Αυτή η μέθοδος ανάλογα με το εισερχόμενο μήνημα κάνει τα εξής:</p>
+<ul>
+<li><code>"ADD"</code>: προσθέτει την τιμή στην αποθήκευση του storage με <code>server.storage += addValue</code></li>
+<li><code>"SUB"</code>: αφαιρεί την τιμή από την αποθήκευση του storage με <code>server.storage -= subValue;</code></li>
+</ul>
+<p>Προτού εκτελέσει οποιαδήποτε από τις παραπάνω εντολές, η <code>ClientHandler</code> αποκτά τον έλεγχο του monitor του αντικειμένου <code>storageLock</code> όπως εξηγείται αναλυτικά στην παράγραφο «Συγχρονισμός» παρακάτω.</p>
+<hr>
+</section>
+<section id="producer" class="level4">
+<h4 class="anchored" data-anchor-id="producer">Producer</h4>
+<p>Ο Producer ως κλάση υλοποιεί την διεπαφή Runnable, που σημαίνει πως μπορούν να την χρησιμοποιήσουν πολλά νήματα. Στη συγκεκριμένη εφαρμογή δημιουργούμε 3 νήματα μέσω μιας for loop στη <code>main()</code>.</p>
+<p>Στην κομμάτι της κυρίως εκτέλεσής της (<code>run()</code>), διαλέγουμε ως θύρα μια τυχαία θέση index της λίστας με τις θύρες του server [8881, 8882, 8883], καθώς και έναν τυχαίο αριθμό μεταξύ 10 και 100 (με <code>10 + random.nextInt(91)</code>). Στη συνέχεια, βάζουμε το prefix <code>ADD</code> - εφόσον ο producer προσθέτει μόνο στον server - ακολουθούμενη από τον αριθμό που θέλουμε να προστεθεί. Αυτά τα περνάμε μαζί στο κανάλι εξερχομένων που καταλήγει στον ClientHandler (<code>out.println(command);</code>). Εάν δεν έχουμε απάντηση από τον ClientHandler, σπάμε τη λούπα, ολοκληρώνεται η run() για το συγκεκριμένο thread, και αυτό σταματιέται από την JVM.</p>
+<hr>
+</section>
+<section id="consumer" class="level4">
+<h4 class="anchored" data-anchor-id="consumer">Consumer</h4>
+<p>Στον consumer ακολουθείται ακριβώς η ίδια διαδικασία με τον Producer, με τη διαφορά της αφαίρεσης από το στοκ (<code>SUB</code>) αντί για αποθήκευση.</p>
+<hr>
+</section>
+</section>
+<section id="συγχρονισμός" class="level3">
+<h3 class="anchored" data-anchor-id="συγχρονισμός">Συγχρονισμός</h3>
+<p>Για τον σωστό συγχρονισμό των νημάτων θα χρησιμοποιήσουμε έναν μηχανισμό συγχρονισμού block, για τον έλεγχο της κλειδαριάς (lock) του monitor ενός αντικειμένου. Το σκεπτικό βασίζεται στο ότι το στιγμιότυπο κάθε κλάσης στην Java έχει εξ’ ορισμού έναν εσωτερικό μηχανισμό που ονομάζεται <code>monitor</code>, που διασφαλίζει την αποκλειστική πρόσβαση στην κατάσταση του αντικειμένου ανά πάσα στιγμή. Ζητάμε λοιπόν από τα νήματα που θέλουμε να εκτελέσουν ένα κομμάτι κώδικα, να αποκτήσουν πρώτα το <code>monitor</code> για ένα τυχαίο αντικείμενο, χρησιμοποιώντας ένα <code>synchronized</code> statement, που έχει την παρακάτω μορφή:</p>
+<pre><code>synchronized (server.storageLock) {
+  ///
+}</code></pre>
+<p>Στην προκειμένη περίπτωση, το νήμα ζητά το <code>monitor</code> του αντικειμένου <code>storageLock</code>. Όσο διαρκεί η εκτέλεση του κώδικα ανάμεσα στις αγκύλες, το <code>monitor</code> κατέχεται από το νήμα. Εάν σε αυτό το διάστημα ένα άλλο νήμα προσπαθήσει να πάρει το monitor, δεν μπορεί, καθώς δύο διεργασίες δεν επιτρεπεται να έχουν ταυτόχρονη πρόσβαση στο ίδιο monitor. Μόλις ελευθερωθεί το <code>monitor</code>, είναι στη διάθεση του κάθε νήματος για να το αποκτήσει, χωρίς να τηρείται κάποια προτεραιότητα.</p>
+<p>Στη δική μας εφαρμογή, χρησιμοποιούμε synchronized statements σε κάθε περίπτωση που θέλουμε πρόσβαση στη μεταβλητή <code>storage</code>, που είναι ο ακέραιος που συμβολίζει την αποθήκη του server.</p>
+<hr>
+</section>
+<section id="έλεγχος-λειτουργίας-του-προγράμματος" class="level3">
+<h3 class="anchored" data-anchor-id="έλεγχος-λειτουργίας-του-προγράμματος">Έλεγχος λειτουργίας του προγράμματος</h3>
+<p>Ο έλεγχος της λειτουργίας του προγράμματος γίνεται μέσω ενός διακόπτη: πρόκειται για μια μεταβλητή τύπου <code>AtomicBoolean</code> με την ονομασία <code>running</code>. Η επιλογή αυτού του τύπου γίνεται γιατί η AtomicBoolean διασφαλίζει την ατομική πρόσβαση σε αυτήν, δηλαδή ένα μόνο νήμα ανά δεδομένη στιγμή μπορεί να δει την τιμή της (μέσω της μεθόδου <code>get()</code>) και να την ενημερώσει (<code>set()</code>), που δεν θα ήταν η περίπτωση με μια κοινή boolean μεταβλητή. Για να δεχθεί ο server αιτήματα σύνδεσης (δημιουργώντας client sockets) και να δημιουργήσει ένα thread για κάθε σύνδεση, θέτουμε ως προϋπόθεση η τιμή του running να είναι ίση με <code>True</code>, μέσω ενός while statement:</p>
+<pre><code>while (running.get()) {
+  // δημιουργία συνδέσεων σε νήματα
+}</code></pre>
+<hr>
+</section>
+<section id="τερματισμός-προγράμματος" class="level3">
+<h3 class="anchored" data-anchor-id="τερματισμός-προγράμματος">Τερματισμός προγράμματος</h3>
+<p>Προκειμένου το πρόγραμμα να μην τρέχει αένεα, αλλά να διακόπτει με ομαλό τρόπο, δημιουργούμε καταρχήν μια μέθοδο του Server με όνομα <code>stop()</code>. Η λειτουργία της έγκειται στο να θέτει την τιμή της προαναφερθείσας AtomicBoolean running ως False (<code>running.set(false);</code>). Η <code>stop()</code> καλείται με δύο τρόπους:</p>
+<ol type="1">
+<li>Θέτουμε εξαρχής έναν πεπερασμένο χρόνο λειτουργίας στα 60 δευτερόλεπτα, μέσω του πεδίου <code>SERVER_LIFETIME</code> στην κλάση του server. Σε μια πλήρη εφαρμογή, όπου θα θέλαμε την συνεχή λειτουργία του προγράμματος, αυτός ο περιορισμός θα μπορούσε να αρθεί, εδώ όμως επιτρέπει τον τερματισμό του χωρίς να χρειαστεί χειροκίνητη διακοπή του από την κονσόλα. Με την έναρξη του προγράμματος, και μέσα στη μέθοδο <code>start()</code>, δημιουργούμε ένα νήμα το οποίο βάζουμε σε κατάσταση παύσης (χρησιμοποιώντας το <code>sleep()</code>) για χρόνο ίσο με <code>SERVER_LIFETIME</code>, και το οποίο μόλις ξυπνήσει, ενεργοποιεί τη μέθοδο <code>stop()</code>.</li>
+</ol>
+<pre><code>    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(SERVER_LIFETIME);
+                stop();
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }, "Shutdown-Timer").start();</code></pre>
+<p>Είναι σημαντικό ότι θεωρούμε τη διακοπή του ύπνου του νήματος (όταν κάποιος καλέσει τη μέθοδό του <code>interrupt()</code> χρησιμοποιώντας ένα <code>InterruptedException</code>) ως θεμιτή, δεν δίνουμε κάποιο error δηλαδή. Τέλος, δίνουμε στο νήμα και όνομα (<code>Shutdown-Timer</code>) ώστε να μπορούμε να κάνουμε σωστό trace σε περίπτωση σφάλματος.</p>
+<ol start="2" type="1">
+<li>Με την πληκτρολόγηση στην κονσόλα του <code>Ctrl+C</code>. Για να το πετύχω αυτό, καλώ καταρχήν την κλάση <code>Runtime</code> (χρησιμοποιώντας τη μέθοδό της <code>getRuntime</code>). Η <code>Runtime</code> είναι μια εγγενής κλάση της Java, ένα στιγμιότυπο της οποίας δημιουργείται αυτόματα σε κάθε εφαρμογή Java, και η οποία επιτρέπει την αλληλεπίδραση με το περιβάλλον της.</li>
+</ol>
+<p>Επί του στιγμιότυπου καλούμε την μέθοδο <code>addShutdownHook</code> της Runtime, η οποία ενεργοποιείται με τον συνδυασμό <code>Ctrl+C</code>, εξ ορισμού της. Αυτή δημιουργεί ένα νήμα, το οποίο στην συγκεκριμένη περίπτωση καλεί τη μέθοδο <code>stop()</code>.</p>
+<pre><code>        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                server.stop();
+            }
+        }));</code></pre>
+<hr>
+</section>
+<section id="πώς-εκτελούμε-το-πρόγραμμα" class="level3">
+<h3 class="anchored" data-anchor-id="πώς-εκτελούμε-το-πρόγραμμα">Πώς εκτελούμε το πρόγραμμα</h3>
+<p>Τρέχω τις παρακάτω εντολές σε ένα terminal την καθεμία, για την εκκίνηση των server:</p>
+<pre><code>java Subtask_4_ProConServer.Server 8881
+java Subtask_4_ProConServer.Server 8882
+java Subtask_4_ProConServer.Server 8883</code></pre>
+<p>Σε ένα τέταρτο terminal τρέχω:</p>
+<pre><code>java Subtask_4_ProConServer.Producer</code></pre>
+<p>Και σε πέμπτο:</p>
+<pre><code>java Subtask_4_ProConServer.Consumer</code></pre>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

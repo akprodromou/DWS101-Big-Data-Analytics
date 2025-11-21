@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="28bd8265-8890-45ab-9ad6-2fdfd77f1cb5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Subtask_3_ClientServer/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Subtask_3_ClientServer/Server.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Subtask_4_ProConServer/ClientHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Subtask_4_ProConServer/Consumer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Subtask_4_ProConServer/Producer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Subtask_4_ProConServer/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Subtask_1_Report.qmd" beforeDir="false" afterPath="$PROJECT_DIR$/Subtask_1_Report.qmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Subtask_2_Report.html" beforeDir="false" afterPath="$PROJECT_DIR$/Subtask_2_Report.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Subtask_2_Report.qmd" beforeDir="false" afterPath="$PROJECT_DIR$/Subtask_2_Report.qmd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Subtask_1_Matrices/MatrixMultiplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Subtask_1_Matrices/MatrixMultiplication.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,27 +39,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.MatrixMultiplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Application.ProducerConsumerMain.executor&quot;: &quot;Debug&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/anton/Desktop/Data Science/MSc Data and Web Science/DWS102 Big Data Analytics/Assignment 1 - Threads and Processes/Assignment_1_Solution_akp&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;/Users/anton/Desktop/Data Science/MSc Data and Web Science/DWS102 Big Data Analytics/Assignment 1 - Threads and Processes/Assignment_1_Solution_akp/src/Main.java&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.MatrixMultiplication.executor": "Debug",
+    "Application.ProducerConsumerMain.executor": "Debug",
+    "Application.ShutdownClient.executor": "Coverage",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/anton/Desktop/Data Science/MSc Data and Web Science/DWS102 Big Data Analytics/Assignment 1 - Threads and Processes/Assignment_1_Solution_akp",
+    "onboarding.tips.debug.path": "/Users/anton/Desktop/Data Science/MSc Data and Web Science/DWS102 Big Data Analytics/Assignment 1 - Threads and Processes/Assignment_1_Solution_akp/Subtask_3_ClientServer/src/Main.java",
+    "run.code.analysis.last.selected.profile": "pProject Default"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MatrixMultiplication">
+  <component name="RunManager" selected="Application.ShutdownClient">
     <configuration name="MatrixMultiplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Subtask_1_Matrices.MatrixMultiplication" />
       <module name="Assignment_1_Solution_akp" />
@@ -80,8 +88,22 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ShutdownClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Subtask_4_ProConServer.ShutdownClient" />
+      <module name="Assignment_1_Solution_akp" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Subtask_4_ProConServer.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.ShutdownClient" />
         <item itemvalue="Application.MatrixMultiplication" />
         <item itemvalue="Application.ProducerConsumerMain" />
       </list>
@@ -103,5 +125,10 @@
       <updated>1761309863411</updated>
     </task>
     <servers />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Assignment_1_Solution_akp$ShutdownClient.ic" NAME="ShutdownClient Coverage Results" MODIFIED="1763633347598" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>Subtask_4_ProConServer.*</FILTER>
+    </SUITE>
   </component>
 </project>
