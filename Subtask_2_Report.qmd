@@ -76,12 +76,13 @@ format:
 ### Multi-threading
 
 Εφόσον έχω δύο threads που εκτελούν τις διεργασίες μου, ορίζω τις συναρτήσεις παραγωγής και κατανάλωσης με τον τύπο synchronized. Αυτή η μέθοδος διασφαλίζει πως μόνο ένα thread μπορεί να εκτελεί ανά οποιαδήποτε στιγμή αλλαγές πάνω σε ένα στιγμιότυπο (instance) ενός αντικειμένου, αποφεύγοντας έτσι ένα race condition. Εσωτερικά, η Java το επιτυγχάνει αυτό χρησιμοποιώντας ένα monitor lock, κλειδώνοντας κάθε φορά το registry:
-```{java}
-        public synchronized void produce() throws InterruptedException {
-        ...
-            synchronized (registry) {
-            ...
-                }
+
+```
+public synchronized void produce() throws InterruptedException {
+...
+    synchronized (registry) {
+    ...
+        }
 ```
 
 ---
@@ -144,27 +145,28 @@ format:
 
 
 ```{python}
+#| echo: false
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 df = pd.read_csv('producer_consumer_results_30_1000.csv')
+df.style.hide(axis="index")
 df
-# df.style.hide(axis="index")
 ```
 
 ```{python}
-# Set style for better-looking plots
+#| echo: false
 sns.set_style("whitegrid")
 
-# Load the data
+# load the data
 df = pd.read_csv('producer_consumer_results_30_1000.csv')
 
-# Create a figure with multiple subplots
+# create the figure
 fig, axes = plt.subplots(3, 1, figsize=(8, 14))
 fig.suptitle('Hospital Patient Management Analysis\n', fontsize=16, fontweight='bold')
 
-# 1. Patients Over Time
+# patients
 ax1 = axes[0]
 ax1.plot(df['GenerationIter'], df['PatientsBeingTreated'], 
          marker='o', label='Patients Being Treated', linewidth=2)
@@ -176,7 +178,7 @@ ax1.set_title('Patient Load Over Time')
 ax1.legend()
 ax1.grid(True, alpha=0.3)
 
-# 3. Cumulative Healing Progress
+# healing process
 ax3 = axes[1]
 ax3.plot(df['GenerationIter'], df['TotalPatientsHealed'], 
          marker='o', color='green', linewidth=2, label='Total Healed')
@@ -192,7 +194,7 @@ ax3.set_title('Cumulative Patients Healed vs Rejected')
 ax3.legend()
 ax3.grid(True, alpha=0.3)
 
-# 6. Hospital Capacity Utilization
+# capacity utilization
 ax6 = axes[2]
 ax6.plot(df['GenerationIter'], df['PatientsBeingTreated'], 
          marker='o', linewidth=2, color='purple')
